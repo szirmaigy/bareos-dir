@@ -1,0 +1,48 @@
+# BareOS 17.2 with MariaDB
+
+version: '2'
+
+services:
+  bareos-dir:
+    image: szirmaigy/bareos-dir:17.2
+    hostname: bareos-dir
+    ports:
+      - 9101:9101
+    environment:
+      DBDRIVER: mysql
+      DBADDRESS: bareos-db
+      DBPORT: 3306
+      DBNAME: bareos
+      DBUSER: bareos
+      DBPASSWORD: bareos
+      MAILUSER: admin@example.lan
+      MAILHUB: server@example.lan
+      MAILDOMAIN: example.lan
+      MAILHOSTNAME: bareos-dir.example.lan
+    links:
+      - bareos-db:bareos-db
+    volumes:
+      - bareos-etc:/etc/bareos
+      - bareos-log:/var/log/bareos
+    #tmpfs:  # If you have lot of memory
+      #- /run:rw,noexec,nosuid,size=65536k
+      #- /tmp:rw,noexec,nosuid,size=1g
+    depends_on:
+      - bareos-db
+
+  bareos-db:
+    image: mariadb:10
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_DATABASE: bareos
+      MYSQL_USER: bareos
+      MYSQL_PASSWORD: bareos
+    volumes:
+      - db-etc:/etc/mysql/conf.d
+      - db-data:/var/lib/mysql
+
+volumes:
+  bareos-etc:
+  bareos-log:
+  db-etc:
+  db-data: 
